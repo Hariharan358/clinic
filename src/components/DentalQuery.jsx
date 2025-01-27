@@ -8,6 +8,9 @@ const ImprovedDentalQueryForm = () => {
     issueType: '',
     query: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,10 +20,32 @@ const ImprovedDentalQueryForm = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    setFormData({ name: '', email: '', issueType: '', query: '' });
+    setIsSubmitting(true);
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    try {
+      const response = await fetch('http://localhost:5007/submit-query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setSuccessMessage('Your query has been submitted successfully!');
+        setFormData({ name: '', email: '', issueType: '', query: '' });
+      } else {
+        setErrorMessage('Failed to submit your query.');
+      }
+    } catch (error) {
+      setErrorMessage('An error occurred. Please try again later.');
+    }
+
+    setIsSubmitting(false);
   };
 
   return (
@@ -34,6 +59,10 @@ const ImprovedDentalQueryForm = () => {
             <div className="uppercase tracking-wide text-sm text-indigo-500 font-semibold mb-1">Online Dental Consultation</div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Ask a Dentist</h2>
             <p className="mt-2 text-gray-600 mb-6">Have a dental concern? Our experts are here to help. Fill out the form below, and we'll get back to you shortly.</p>
+            
+            {successMessage && <div className="text-green-500 mb-4">{successMessage}</div>}
+            {errorMessage && <div className="text-red-500 mb-4">{errorMessage}</div>}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -103,9 +132,10 @@ const ImprovedDentalQueryForm = () => {
               <div>
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
                 >
-                  Submit Query
+                  {isSubmitting ? 'Submitting...' : 'Submit Query'}
                 </button>
               </div>
             </form>
@@ -117,4 +147,3 @@ const ImprovedDentalQueryForm = () => {
 };
 
 export default ImprovedDentalQueryForm;
-

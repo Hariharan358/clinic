@@ -15,11 +15,29 @@ function AppointmentBooking() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically send the form data to your backend
-    console.log('Form submitted:', formData);
-    alert('Appointment booked successfully!');
+
+    
+    try {
+      const response = await fetch('http://localhost:5001/api/book-appointment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert('Appointment booked successfully!');
+      } else {
+        alert('Error booking appointment:', data.message);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error booking appointment');
+    }
   };
 
   return (
